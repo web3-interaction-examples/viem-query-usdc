@@ -18,7 +18,7 @@
  * })
  */
 
-// 1. Import required modules
+// Import required modules
 import { mainnet } from 'viem/chains'
 import {
   createPublicClient,
@@ -26,13 +26,14 @@ import {
   getContract
 } from 'viem'
 
-// 2. Create a public client, connecting to the Ethereum mainnet
+// Create a public client, connecting to the Ethereum mainnet
 const client = createPublicClient({
   chain: mainnet,
   transport: http()
 })
 
-// 3. Define NFT contract address and ABI
+// Define NFT contract address and ABI
+// https://etherscan.io/token/0x0483b0dfc6c78062b9e999a82ffb795925381415
 const NFT_CONTRACT_ADDRESS = '0x0483b0dfc6c78062b9e999a82ffb795925381415'
 const NFT_ABI = [
   { "inputs": [], "stateMutability": "nonpayable", "type": "constructor" },
@@ -92,7 +93,7 @@ const nftContract = getContract({
   publicClient: client,
 })
 
-// 4. Define an asynchronous function to fetch NFT information
+// Define an asynchronous function to fetch NFT information
 async function getNFTInfo(tokenId) {
   try {
     console.log('Starting to fetch NFT information...')
@@ -126,7 +127,7 @@ async function getNFTInfo(tokenId) {
   }
 }
 
-// 5. Call the function, passing the tokenId to query
+// Call the function, passing the tokenId to query
 const tokenId = 1
 // https://ipfs.io/ipfs/QmT3wMgcmm9R1dC1F63rBFdQdGYCfWfpv1D1PXYXTwrEaQ/1.jpg
 getNFTInfo(tokenId).catch(error => {
