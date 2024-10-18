@@ -2,7 +2,7 @@
 use viem to query nft information
 
 ## Install dependency packages
-- ``npm install viem``
+- ``npm install viem@1``
 
 ## Init the project
 - ``npm init -y``
