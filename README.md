@@ -6,6 +6,6 @@ use viem to query nft information
 
 ## Init the project
 - ``npm init -y``
-- 
+
 ## Run the project
 - ``node example.js``
