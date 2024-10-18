@@ -1,0 +1,17 @@
+{
+  "type": "module",
+  "dependencies": {
+    "viem": "^2.21.29"
+  },
+  "name": "viem-example",
+  "version": "1.0.0",
+  "main": "example.js",
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "A simple viem example"
+}
