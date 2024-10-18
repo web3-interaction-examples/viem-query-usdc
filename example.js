@@ -130,6 +130,7 @@ async function getNFTInfo(tokenId) {
 // Call the function, passing the tokenId to query
 const tokenId = 1
 // https://ipfs.io/ipfs/QmT3wMgcmm9R1dC1F63rBFdQdGYCfWfpv1D1PXYXTwrEaQ/1.jpg
+// https://opensea.io/assets/ethereum/0x0483b0dfc6c78062b9e999a82ffb795925381415/1
 getNFTInfo(tokenId).catch(error => {
   console.error('Error in main function execution:', error)
 })
