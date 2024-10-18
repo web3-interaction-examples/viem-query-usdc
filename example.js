@@ -87,12 +87,6 @@ const NFT_ABI = [
   { "inputs": [], "name": "wlroot2", "outputs": [{ "internalType": "bytes32", "name": "", "type": "bytes32" }], "stateMutability": "view", "type": "function" }
 ]
 
-const nftContract = getContract({
-  address: NFT_CONTRACT_ADDRESS,
-  abi: NFT_ABI,
-  publicClient: client,
-})
-
 // Define an asynchronous function to fetch NFT information
 async function getNFTInfo(tokenId) {
   try {
