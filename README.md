@@ -1,5 +1,5 @@
-# viem-query-nft
-use viem to query nft information
+# viem-query-usdc
+use viem to query usdc information
 
 ## Install dependency packages
 - ``npm install viem``
