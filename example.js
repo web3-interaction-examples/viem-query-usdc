@@ -23,108 +23,81 @@ import { mainnet } from 'viem/chains'
 import {
   createPublicClient,
   http,
-  getContract
+  parseAbiItem
 } from 'viem'
 
-// Create a public client, connecting to the Ethereum mainnet
+// Create a public client, connecting to the custom RPC
 const client = createPublicClient({
   chain: mainnet,
-  transport: http()
+  transport: http('https://eth.llamarpc.com')
 })
 
-// Define NFT contract address and ABI
-// https://etherscan.io/token/0x0483b0dfc6c78062b9e999a82ffb795925381415
-const NFT_CONTRACT_ADDRESS = '0x0483b0dfc6c78062b9e999a82ffb795925381415'
-const NFT_ABI = [
-  { "inputs": [], "stateMutability": "nonpayable", "type": "constructor" },
-  { "inputs": [{ "internalType": "address", "name": "owner", "type": "address" }], "name": "OwnableInvalidOwner", "type": "error" },
-  { "inputs": [{ "internalType": "address", "name": "account", "type": "address" }], "name": "OwnableUnauthorizedAccount", "type": "error" },
-  { "anonymous": false, "inputs": [{ "indexed": true, "internalType": "address", "name": "owner", "type": "address" }, { "indexed": true, "internalType": "address", "name": "approved", "type": "address" }, { "indexed": true, "internalType": "uint256", "name": "tokenId", "type": "uint256" }], "name": "Approval", "type": "event" },
-  { "anonymous": false, "inputs": [{ "indexed": true, "internalType": "address", "name": "owner", "type": "address" }, { "indexed": true, "internalType": "address", "name": "operator", "type": "address" }, { "indexed": false, "internalType": "bool", "name": "approved", "type": "bool" }], "name": "ApprovalForAll", "type": "event" },
-  { "anonymous": false, "inputs": [{ "indexed": true, "internalType": "address", "name": "previousOwner", "type": "address" }, { "indexed": true, "internalType": "address", "name": "newOwner", "type": "address" }], "name": "OwnershipTransferred", "type": "event" },
-  { "anonymous": false, "inputs": [{ "indexed": true, "internalType": "address", "name": "from", "type": "address" }, { "indexed": true, "internalType": "address", "name": "to", "type": "address" }, { "indexed": true, "internalType": "uint256", "name": "tokenId", "type": "uint256" }], "name": "Transfer", "type": "event" },
-  { "inputs": [], "name": "Price", "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }], "stateMutability": "view", "type": "function" },
-  { "inputs": [], "name": "TotalNum", "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }], "stateMutability": "view", "type": "function" },
-  { "inputs": [{ "internalType": "address", "name": "_address", "type": "address" }], "name": "addToBlacklist", "outputs": [], "stateMutability": "nonpayable", "type": "function" },
-  { "inputs": [{ "internalType": "address", "name": "_to", "type": "address" }, { "internalType": "uint256", "name": "numberOfTokens", "type": "uint256" }], "name": "airdrop", "outputs": [], "stateMutability": "nonpayable", "type": "function" },
-  { "inputs": [{ "internalType": "address", "name": "to", "type": "address" }, { "internalType": "uint256", "name": "tokenId", "type": "uint256" }], "name": "approve", "outputs": [], "stateMutability": "nonpayable", "type": "function" },
-  { "inputs": [{ "internalType": "address", "name": "owner", "type": "address" }], "name": "balanceOf", "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }], "stateMutability": "view", "type": "function" },
-  { "inputs": [{ "internalType": "address", "name": "", "type": "address" }], "name": "blacklist", "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }], "stateMutability": "view", "type": "function" },
-  { "inputs": [{ "internalType": "uint256", "name": "tokenId", "type": "uint256" }], "name": "getApproved", "outputs": [{ "internalType": "address", "name": "", "type": "address" }], "stateMutability": "view", "type": "function" },
-  { "inputs": [{ "internalType": "address", "name": "owner", "type": "address" }, { "internalType": "address", "name": "operator", "type": "address" }], "name": "isApprovedForAll", "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }], "stateMutability": "view", "type": "function" },
-  { "inputs": [{ "internalType": "address", "name": "account", "type": "address" }], "name": "isContract", "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }], "stateMutability": "view", "type": "function" },
-  { "inputs": [{ "internalType": "address", "name": "", "type": "address" }], "name": "listClaimed", "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }], "stateMutability": "view", "type": "function" },
-  { "inputs": [], "name": "mint", "outputs": [], "stateMutability": "payable", "type": "function" },
-  { "inputs": [], "name": "name", "outputs": [{ "internalType": "string", "name": "", "type": "string" }], "stateMutability": "view", "type": "function" },
-  { "inputs": [], "name": "nextOwnerToExplicitlySet", "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }], "stateMutability": "view", "type": "function" },
-  { "inputs": [], "name": "owner", "outputs": [{ "internalType": "address", "name": "", "type": "address" }], "stateMutability": "view", "type": "function" },
-  { "inputs": [{ "internalType": "uint256", "name": "tokenId", "type": "uint256" }], "name": "ownerOf", "outputs": [{ "internalType": "address", "name": "", "type": "address" }], "stateMutability": "view", "type": "function" },
-  { "inputs": [], "name": "publicMintEnabled", "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }], "stateMutability": "view", "type": "function" },
-  { "inputs": [{ "internalType": "address", "name": "_address", "type": "address" }], "name": "removeFromBlacklist", "outputs": [], "stateMutability": "nonpayable", "type": "function" },
-  { "inputs": [], "name": "renounceOwnership", "outputs": [], "stateMutability": "nonpayable", "type": "function" },
-  { "inputs": [{ "internalType": "address", "name": "_from", "type": "address" }, { "internalType": "address", "name": "_to", "type": "address" }, { "internalType": "uint256", "name": "_tokenId", "type": "uint256" }], "name": "safeTransferFrom", "outputs": [], "stateMutability": "nonpayable", "type": "function" },
-  { "inputs": [{ "internalType": "address", "name": "_from", "type": "address" }, { "internalType": "address", "name": "_to", "type": "address" }, { "internalType": "uint256", "name": "_tokenId", "type": "uint256" }, { "internalType": "bytes", "name": "_data", "type": "bytes" }], "name": "safeTransferFrom", "outputs": [], "stateMutability": "nonpayable", "type": "function" },
-  { "inputs": [{ "internalType": "address", "name": "operator", "type": "address" }, { "internalType": "bool", "name": "approved", "type": "bool" }], "name": "setApprovalForAll", "outputs": [], "stateMutability": "nonpayable", "type": "function" },
-  { "inputs": [{ "internalType": "string", "name": "baseURI_", "type": "string" }], "name": "setBaseURI", "outputs": [], "stateMutability": "nonpayable", "type": "function" },
-  { "inputs": [{ "internalType": "uint256", "name": "newPrice", "type": "uint256" }], "name": "setPrice", "outputs": [], "stateMutability": "nonpayable", "type": "function" },
-  { "inputs": [{ "internalType": "bool", "name": "enable", "type": "bool" }], "name": "setPublicMint", "outputs": [], "stateMutability": "nonpayable", "type": "function" },
-  { "inputs": [{ "internalType": "bytes32", "name": "mroot", "type": "bytes32" }, { "internalType": "uint256", "name": "step", "type": "uint256" }], "name": "setRoot", "outputs": [], "stateMutability": "nonpayable", "type": "function" },
-  { "inputs": [{ "internalType": "bool", "name": "enable", "type": "bool" }, { "internalType": "uint256", "name": "step", "type": "uint256" }], "name": "setWlMint", "outputs": [], "stateMutability": "nonpayable", "type": "function" },
-  { "inputs": [{ "internalType": "bytes4", "name": "interfaceId", "type": "bytes4" }], "name": "supportsInterface", "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }], "stateMutability": "view", "type": "function" },
-  { "inputs": [], "name": "symbol", "outputs": [{ "internalType": "string", "name": "", "type": "string" }], "stateMutability": "view", "type": "function" },
-  { "inputs": [{ "internalType": "uint256", "name": "index", "type": "uint256" }], "name": "tokenByIndex", "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }], "stateMutability": "view", "type": "function" },
-  { "inputs": [{ "internalType": "address", "name": "owner", "type": "address" }, { "internalType": "uint256", "name": "index", "type": "uint256" }], "name": "tokenOfOwnerByIndex", "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }], "stateMutability": "view", "type": "function" },
-  { "inputs": [{ "internalType": "uint256", "name": "_tokenId", "type": "uint256" }], "name": "tokenURI", "outputs": [{ "internalType": "string", "name": "", "type": "string" }], "stateMutability": "view", "type": "function" },
-  { "inputs": [], "name": "totalSupply", "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }], "stateMutability": "view", "type": "function" },
-  { "inputs": [{ "internalType": "address", "name": "_from", "type": "address" }, { "internalType": "address", "name": "_to", "type": "address" }, { "internalType": "uint256", "name": "_tokenId", "type": "uint256" }], "name": "transferFrom", "outputs": [], "stateMutability": "nonpayable", "type": "function" },
-  { "inputs": [{ "internalType": "address", "name": "newOwner", "type": "address" }], "name": "transferOwnership", "outputs": [], "stateMutability": "nonpayable", "type": "function" },
-  { "inputs": [], "name": "withdraw", "outputs": [], "stateMutability": "nonpayable", "type": "function" },
-  { "inputs": [], "name": "wlMintStep1Enabled", "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }], "stateMutability": "view", "type": "function" },
-  { "inputs": [], "name": "wlMintStep2Enabled", "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }], "stateMutability": "view", "type": "function" },
-  { "inputs": [{ "internalType": "bytes32[]", "name": "proof", "type": "bytes32[]" }], "name": "wlmint1", "outputs": [], "stateMutability": "payable", "type": "function" },
-  { "inputs": [{ "internalType": "bytes32[]", "name": "proof", "type": "bytes32[]" }], "name": "wlmint2", "outputs": [], "stateMutability": "payable", "type": "function" },
-  { "inputs": [], "name": "wlroot1", "outputs": [{ "internalType": "bytes32", "name": "", "type": "bytes32" }], "stateMutability": "view", "type": "function" },
-  { "inputs": [], "name": "wlroot2", "outputs": [{ "internalType": "bytes32", "name": "", "type": "bytes32" }], "stateMutability": "view", "type": "function" }
-]
+// USDC contract address
+const USDC_CONTRACT_ADDRESS = '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
 
-// Define an asynchronous function to fetch NFT information
-async function getNFTInfo(tokenId) {
+// USDC Transfer event ABI
+const transferEventAbi = parseAbiItem('event Transfer(address indexed from, address indexed to, uint256 value)')
+
+// USDC decimals function ABI
+const decimalsAbi = parseAbiItem('function decimals() view returns (uint8)')
+
+// Get the latest USDC transfer records
+async function getRecentUSDCTransfers() {
   try {
-    console.log('Starting to fetch NFT information...')
-    console.log('Contract address:', NFT_CONTRACT_ADDRESS)
-    console.log('Token ID:', tokenId)
+    console.log('start...')
 
-    // Get the address of the NFT owner
-    const ownerAddress = await client.readContract({
-      address: NFT_CONTRACT_ADDRESS,
-      abi: NFT_ABI,
-      functionName: 'ownerOf',
-      args: [BigInt(tokenId)]
+    const decimals = await client.readContract({
+      address: USDC_CONTRACT_ADDRESS,
+      abi: [decimalsAbi],
+      functionName: 'decimals',
     })
-    console.log(`Owner address of Token ID ${tokenId}:`, ownerAddress)
+    console.log(`USDC decimals: ${decimals}`)
 
-    // Get the NFT metadata URI
-    const tokenURI = await client.readContract({
-      address: NFT_CONTRACT_ADDRESS,
-      abi: NFT_ABI,
-      functionName: 'tokenURI',
-      args: [BigInt(tokenId)]
+    const latestBlockNumber = await client.getBlockNumber()
+    console.log(`latest block number: ${latestBlockNumber}`)
+
+    const blocksToQuery = 100 // query 100 blocks
+    const fromBlock = latestBlockNumber - BigInt(blocksToQuery)
+    console.log(`query range: from block ${fromBlock} to ${latestBlockNumber}`)
+
+    const logs = await client.getLogs({
+      address: USDC_CONTRACT_ADDRESS,
+      event: transferEventAbi,
+      fromBlock: fromBlock,
+      toBlock: latestBlockNumber
     })
-    console.log(`Metadata URI of Token ID ${tokenId}:`, tokenURI)
+
+    console.log(`total ${logs.length} USDC transfer records found`)
+
+    if (logs.length === 0) {
+      console.log('no USDC transfer records found in the recent blocks, this is unusual.')
+    } else {
+      console.log('USDC transfer records statistics:')
+      console.log(`the earliest transfer record is in block: ${logs[0].blockNumber}`)
+      console.log(`the latest transfer record is in block: ${logs[logs.length - 1].blockNumber}`)
+      
+      console.log('\nthe latest 100 USDC transfer records (reverse order):')
+      logs.slice(-100).reverse().forEach((log, index) => {
+        const { args, transactionHash, blockNumber } = log
+        const amount = Number(args.value) / Math.pow(10, decimals)
+        console.log(`${index + 1}. block ${blockNumber}: from ${args.from} to ${args.to} ${amount.toFixed(decimals)} USDC, tx: ${transactionHash}`)
+      })
+
+      // 计算总转账金额
+      const totalAmount = logs.reduce((sum, log) => sum + Number(log.args.value), 0) / Math.pow(10, decimals)
+      console.log(`\nin ${blocksToQuery} blocks, total ${totalAmount.toFixed(2)} USDC transferred`)
+    }
 
   } catch (error) {
-    console.error('Error occurred while fetching NFT information:', error)
-    console.error('Error stack:', error.stack)
+    console.error('error when getting USDC transfer records:', error)
+    console.error('error stack:', error.stack)
     if (error.cause) {
-      console.error('Error cause:', error.cause)
+      console.error('error cause:', error.cause)
     }
   }
 }
 
-// Call the function, passing the tokenId to query
-const tokenId = 1
-// https://ipfs.io/ipfs/QmT3wMgcmm9R1dC1F63rBFdQdGYCfWfpv1D1PXYXTwrEaQ/1.jpg
-// https://opensea.io/assets/ethereum/0x0483b0dfc6c78062b9e999a82ffb795925381415/1
-getNFTInfo(tokenId).catch(error => {
-  console.error('Error in main function execution:', error)
+// Call the function to get USDC transfer records
+getRecentUSDCTransfers().catch(error => {
+  console.error('main function error:', error)
 })
