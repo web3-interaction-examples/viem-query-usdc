@@ -60,6 +60,7 @@ async function getRecentUSDCTransfers() {
     const fromBlock = latestBlockNumber - BigInt(blocksToQuery)
     console.log(`query range: from block ${fromBlock} to ${latestBlockNumber}`)
 
+    // use getLogs to get the USDC transfer records
     const logs = await client.getLogs({
       address: USDC_CONTRACT_ADDRESS,
       event: transferEventAbi,
